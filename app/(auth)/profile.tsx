@@ -1,5 +1,12 @@
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "@/utils/supabase";
 import * as FileSystem from "expo-file-system";
@@ -7,6 +14,34 @@ import { decode } from "base64-arraybuffer";
 
 const Profile = () => {
   const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadUserAvatar();
+  }, []);
+
+  const loadUserAvatar = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(`${user.id}/avatar.png`);
+
+      if (data?.publicUrl) {
+        setImage(data.publicUrl);
+      }
+    } catch (error) {
+      console.log("Error loading avatar:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pickImage = async () => {
     const permissionResult =
@@ -25,29 +60,45 @@ const Profile = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setLoading(true);
+      try {
+        setImage(result.assets[0].uri);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const img = result.assets[0];
-      const base64 = await FileSystem.readAsStringAsync(img.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const img = result.assets[0];
+        const base64 = await FileSystem.readAsStringAsync(img.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
 
-      const filePath = `${user?.id}/avatar.png`;
-      const contentType = "image/png";
+        const filePath = `${user?.id}/avatar.png`;
+        const contentType = "image/png";
 
-      await supabase.storage.from("avatars").upload(filePath, decode(base64), {
-        contentType,
-      });
+        await supabase.storage
+          .from("avatars")
+          .upload(filePath, decode(base64), {
+            contentType,
+            upsert: true,
+          });
+      } catch (error) {
+        console.log("Error uploading file:", error);
+        console.log("Error:", JSON.stringify(error, null, 2));
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.avatar}>
-        {image ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={{ color: "#fff" }}>Uploading...</Text>
+          </View>
+        ) : image ? (
           <Image
             source={{ uri: image }}
             style={{ width: "100%", height: "100%", borderRadius: 50 }}
@@ -76,6 +127,7 @@ const Profile = () => {
             alignItems: "center",
           }}
           onPress={pickImage}
+          disabled={loading}
         >
           <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
             +
@@ -89,6 +141,10 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#151515",
+  },
   avatar: {
     width: 200,
     height: 200,
@@ -96,5 +152,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 100,
     margin: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
   },
 });
