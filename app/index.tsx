@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useState } from "react";
-import { useSystem } from "@/powersync/PowerSync";
+import { useSystem } from "@/powersync/drizzle/PowerSync";
 import { AuthError } from "@supabase/supabase-js";
 
 const Page = () => {

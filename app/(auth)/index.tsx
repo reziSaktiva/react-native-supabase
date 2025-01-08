@@ -9,9 +9,10 @@ import {
 import React, { useState, useEffect } from "react";
 import SwipeableRow from "@/components/swipeableRow";
 import { Ionicons } from "@expo/vector-icons";
-import { useSystem } from "@/powersync/PowerSync";
+import { useSystem } from "@/powersync/drizzle/PowerSync";
 import { uuid } from "@/powersync/uuid";
-import { Todo, TODOS_TABLE } from "@/powersync/AppSchema";
+import { Todo, todos as todoSchema } from "@/powersync/drizzle/AppSchema";
+import { eq } from "drizzle-orm";
 
 const Page = () => {
   const [task, setTask] = useState("");
@@ -24,8 +25,7 @@ const Page = () => {
   }, []);
 
   const loadTodos = async () => {
-    const result = await db?.selectFrom(TODOS_TABLE).selectAll().execute();
-    console.log(result);
+    const result = await db?.select().from(todoSchema);
     setTodos(result || []);
   };
 
@@ -34,7 +34,7 @@ const Page = () => {
     const todoId = uuid();
 
     await db
-      ?.insertInto(TODOS_TABLE)
+      ?.insert(todoSchema)
       .values({ id: todoId, task, user_id: userID, is_complete: 0 })
       .execute();
 
@@ -44,15 +44,20 @@ const Page = () => {
 
   const updateTodo = async (todo: Todo) => {
     await db
-      ?.updateTable(TODOS_TABLE)
-      .where("id", "=", todo.id)
+      ?.update(todoSchema)
       .set({ is_complete: todo.is_complete === 1 ? 0 : 1 })
+      .where(eq(todoSchema.id, todo.id))
       .execute();
+    // await db
+    //   ?.updateTable(TODOS_TABLE)
+    //   .where("id", "=", todo.id)
+    //   .set()
+    //   .execute();
     loadTodos();
   };
 
   const deleteTodo = async (todo: Todo) => {
-    await db?.deleteFrom(TODOS_TABLE).where("id", "=", todo.id).execute();
+    await db?.delete(todoSchema).where(eq(todoSchema.id, todo.id)).execute();
     loadTodos();
   };
 

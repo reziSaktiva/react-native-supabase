@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { PowerSyncProvider } from "@/powersync/PowerSyncProvider";
-import { useSystem } from "@/powersync/PowerSync";
+import { initSystem, useSystem } from "@/powersync/drizzle/PowerSync";
 import { StatusBar } from "expo-status-bar";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -18,10 +18,9 @@ function InitialLayout() {
   const router = useRouter();
 
   const { supabaseConnector } = useSystem();
-  const system = useSystem();
 
   useEffect(() => {
-    system.init();
+    initSystem();
   }, []);
 
   useEffect(() => {
