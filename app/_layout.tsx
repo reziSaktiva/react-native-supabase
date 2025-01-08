@@ -1,26 +1,36 @@
-import { supabase } from "@/utils/supabase";
 import { Session } from "@supabase/supabase-js";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import { PowerSyncProvider } from "@/powersync/PowerSyncProvider";
+import { useSystem } from "@/powersync/PowerSync";
+import { StatusBar } from "expo-status-bar";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function InitialLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [initialize, setInitialize] = useState<boolean>(false);
 
   const segments = useSegments();
   const router = useRouter();
 
+  const { supabaseConnector } = useSystem();
+  const system = useSystem();
+
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setInitialize(true);
-    });
+    system.init();
+  }, []);
+
+  useEffect(() => {
+    const { data } = supabaseConnector.client.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setInitialize(true);
+      }
+    );
 
     return () => {
       data.subscription.unsubscribe();
@@ -32,25 +42,25 @@ export default function RootLayout() {
 
     const inAuthGroup = segments[0] === "(auth)";
 
-    if (!inAuthGroup && session) {
+    if (session && !inAuthGroup) {
       router.replace("/(auth)");
     } else if (!session) {
       router.replace("/");
     }
-  }, [initialize, session, segments]);
+  }, [session, initialize]);
 
   return (
     <>
-      <Stack>
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="light" />
+      <StatusBar style="auto" />
+      <Slot />
     </>
   );
 }
+
+const RootLayout = () => (
+  <PowerSyncProvider>
+    <InitialLayout />
+  </PowerSyncProvider>
+);
+
+export default RootLayout;

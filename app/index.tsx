@@ -9,24 +9,20 @@ import {
   Alert,
 } from "react-native";
 import React, { useState } from "react";
-import { supabase } from "@/utils/supabase";
+import { useSystem } from "@/powersync/PowerSync";
+import { AuthError } from "@supabase/supabase-js";
 
 const Page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { supabaseConnector } = useSystem();
+
   const onSignInPress = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        Alert.alert("Error", error.message);
-      }
+      await supabaseConnector.login(email, password);
     } catch (error) {
       Alert.alert("Error", "An unexpected error occurred");
     } finally {
@@ -36,16 +32,14 @@ const Page = () => {
   const onSignUpPress = async () => {
     setLoading(true);
     try {
-      const {
-        error,
-        data: { session },
-      } = await supabase.auth.signUp({
+      const { session, error } = await supabaseConnector.signUp(
         email,
-        password,
-      });
+        password
+      );
 
       if (error) {
-        Alert.alert("Error", error.message);
+        const authError = error as AuthError;
+        Alert.alert("Error", authError.message);
       }
 
       if (!session) {

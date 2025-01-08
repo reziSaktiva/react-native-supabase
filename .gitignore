@@ -10,6 +10,8 @@ ios/
 dist/
 web-build/
 expo-env.d.ts
+.env.*
+
 
 # Native
 *.orig.*

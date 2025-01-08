@@ -5,125 +5,66 @@ import {
   Button,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/utils/supabase";
-import { Todo } from "@/utils/interfaces";
 import SwipeableRow from "@/components/swipeableRow";
 import { Ionicons } from "@expo/vector-icons";
+import { useSystem } from "@/powersync/PowerSync";
+import { uuid } from "@/powersync/uuid";
+import { Todo, TODOS_TABLE } from "@/powersync/AppSchema";
 
 const Page = () => {
-  const [todo, setTodo] = useState("");
+  const [task, setTask] = useState("");
   const [loading, setLoading] = useState(false);
   const [todos, setTodos] = useState<Todo[]>([]);
+  const { supabaseConnector, db } = useSystem();
 
   useEffect(() => {
-    fetchTodos();
+    loadTodos();
   }, []);
 
-  const fetchTodos = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("todos")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("inserted_at", { ascending: false });
-
-    if (error) {
-      console.log("error", error);
-      return;
-    }
-
-    setTodos(data);
+  const loadTodos = async () => {
+    const result = await db?.selectFrom(TODOS_TABLE).selectAll().execute();
+    console.log(result);
+    setTodos(result || []);
   };
 
   const addTodo = async () => {
-    setLoading(true);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const { userID } = await supabaseConnector.fetchCredentials();
+    const todoId = uuid();
 
-      if (!user) {
-        console.log("User not found");
-        return;
-      }
+    await db
+      ?.insertInto(TODOS_TABLE)
+      .values({ id: todoId, task, user_id: userID, is_complete: 0 })
+      .execute();
 
-      const newTodo = {
-        task: todo,
-        user_id: user?.id,
-      };
-
-      const { data, error } = await supabase
-        .from("todos")
-        .insert(newTodo)
-        .select()
-        .single();
-
-      if (error) {
-        console.log("error", error);
-        return;
-      }
-
-      setTodos([data, ...todos]);
-      setTodo("");
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      setLoading(false);
-    }
+    setTask("");
+    loadTodos();
   };
 
-  const deleteTodo = async (id: number) => {
-    try {
-      const { error } = await supabase.from("todos").delete().eq("id", id);
-
-      if (error) {
-        console.log("error", error);
-        return;
-      }
-
-      setTodos(todos.filter((todo) => todo.id !== id));
-    } catch (error) {
-      console.log("error", error);
-    }
+  const updateTodo = async (todo: Todo) => {
+    await db
+      ?.updateTable(TODOS_TABLE)
+      .where("id", "=", todo.id)
+      .set({ is_complete: todo.is_complete === 1 ? 0 : 1 })
+      .execute();
+    loadTodos();
   };
 
-  const updateTodo = async (id: number, is_complete: boolean) => {
-    try {
-      const { error } = await supabase
-        .from("todos")
-        .update({ is_complete })
-        .eq("id", id);
-
-      if (error) {
-        console.log("error", error);
-        return;
-      }
-
-      setTodos(
-        todos.map((todo) => (todo.id === id ? { ...todo, is_complete } : todo))
-      );
-    } catch (error) {
-      console.log("error", error);
-    }
+  const deleteTodo = async (todo: Todo) => {
+    await db?.deleteFrom(TODOS_TABLE).where("id", "=", todo.id).execute();
+    loadTodos();
   };
 
-  const renderTodo = ({ item }: { item: Todo }) => (
+  const renderRow = ({ item }: { item: Todo }) => (
     <SwipeableRow
       todo={item}
-      onToggle={() => updateTodo(item.id, !item.is_complete)}
-      onDelete={() => deleteTodo(item.id)}
+      onToggle={() => updateTodo(item)}
+      onDelete={() => deleteTodo(item)}
     >
       <View style={styles.todoItem}>
         <Text style={styles.todoText}>{item.task}</Text>
-        {item.is_complete && (
+        {item.is_complete === 1 && (
           <Ionicons
             name="checkmark-done-circle-outline"
             size={17}
@@ -139,21 +80,21 @@ const Page = () => {
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Todo"
-          value={todo}
-          onChangeText={setTodo}
+          value={task}
+          onChangeText={setTask}
           placeholderTextColor="#999"
           style={styles.textInput}
         />
         <Button
           title="Add Todo"
           color="#2b825b"
-          disabled={loading || todo === ""}
+          disabled={loading || task === ""}
           onPress={addTodo}
         />
       </View>
       <FlatList
         data={todos}
-        renderItem={renderTodo}
+        renderItem={renderRow}
         keyExtractor={(item) => item.id.toString()}
         style={styles.list}
       />

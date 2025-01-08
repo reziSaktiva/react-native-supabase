@@ -1,4 +1,4 @@
-import { Todo } from "@/utils/interfaces";
+import { Todo } from "@/powersync/AppSchema";
 import React, { Component, PropsWithChildren } from "react";
 import { Animated, I18nManager, StyleSheet, View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
@@ -56,9 +56,9 @@ export default class AppleStyleSwipeableRow extends Component<
         flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
       }}
     >
-      {!this.props.todo.is_complete &&
+      {this.props.todo.is_complete === 0 &&
         this.renderRightAction("Done", "#00d890", 160, progress)}
-      {this.props.todo.is_complete &&
+      {this.props.todo.is_complete === 1 &&
         this.renderRightAction("Undone", "#ffab00", 160, progress)}
       {this.renderRightAction("Delete", "red", 160, progress)}
     </View>

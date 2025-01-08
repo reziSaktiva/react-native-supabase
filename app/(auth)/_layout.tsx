@@ -2,8 +2,16 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native";
+import { useSystem } from "@/powersync/PowerSync";
 
 const Layout = () => {
+  const { supabaseConnector, powersync } = useSystem();
+  const onSignOut = async () => {
+    await powersync?.disconnectAndClear();
+    await supabaseConnector.client.auth.signOut();
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Tabs
@@ -26,6 +34,11 @@ const Layout = () => {
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" color={color} size={size} />
+            ),
+            headerRight: () => (
+              <TouchableOpacity onPress={onSignOut}>
+                <Ionicons name="log-out-outline" color="#fff" size={24} />
+              </TouchableOpacity>
             ),
           }}
         />
