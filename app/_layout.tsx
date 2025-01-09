@@ -1,15 +1,11 @@
 import React from "react";
 import { Session } from "@supabase/supabase-js";
 import { Slot, useRouter, useSegments } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { PowerSyncProvider } from "@/powersync/drizzle/PowerSyncProvider";
 import { useSystem } from "@/powersync/drizzle/PowerSync";
 import { StatusBar } from "expo-status-bar";
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
 
 function InitialLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -18,8 +14,8 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  const { supabaseConnector } = useSystem();
   const system = useSystem();
+  const { supabaseConnector } = useSystem();
 
   useEffect(() => {
     system.init()

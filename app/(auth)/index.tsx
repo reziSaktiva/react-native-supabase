@@ -26,6 +26,7 @@ const Page = () => {
 
   const loadTodos = async () => {
     const result = await db?.select().from(todoSchema);
+
     setTodos(result || []);
   };
 
@@ -33,12 +34,15 @@ const Page = () => {
     const { userID } = await supabaseConnector.fetchCredentials();
     const todoId = uuid();
 
+    if (!task || typeof task !== 'string' || task.trim() === '') {
+      console.error('Invalid task input');
+      return;
+    }
+
     await db
       ?.insert(todoSchema)
       .values({ id: todoId, task, user_id: userID, is_complete: 0 })
-      .execute().catch((error) => {
-        console.error(error);
-      });
+      .execute();
 
     setTask("");
     loadTodos();

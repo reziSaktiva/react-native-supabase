@@ -93,14 +93,10 @@ export class Connector implements PowerSyncBackendConnector {
       throw new Error(`Could not fetch Supabase credentials: ${error}`);
     }
 
-    console.log(session.access_token);
-
     return {
       client: this.client,
       endpoint: powersyncUrl,
       token: session.access_token ?? "",
-      // token:
-      //   "eyJhbGciOiJSUzI1NiIsImtpZCI6InBvd2Vyc3luYy1kZXYtMzIyM2Q0ZTMifQ.eyJzdWIiOiJEZXYiLCJpYXQiOjE3MzYyNDMxNzQsImlzcyI6Imh0dHBzOi8vcG93ZXJzeW5jLWFwaS5qb3VybmV5YXBwcy5jb20iLCJhdWQiOiJodHRwczovLzY3N2NkNDUyMWQ0YjdjNjNlZmQ0MzVkNi5wb3dlcnN5bmMuam91cm5leWFwcHMuY29tIiwiZXhwIjoxNzM2Mjg2Mzc0fQ.sdUwoZVj9uvHhkMcpyLWnnhpK2eBLnO7nhJT33ybV0Cmi_nEvo8JahqIJBAlr8dfxBVqzSfprxuaOFPYi5sgon3NNVo4b4CkMuJNsjPbc7WYI3F9sdihr2Vkx3C5VfAdkLnygfWhqNqvhEU5KzDi9WFJIntSDCh-Tl4i8Sn-GUscncJjHPW_Bsc6tzEvqh70WglHnM3tycoYZQgR0o6j-f85UIYFr5hbTPl6WCxyudgJePwmjsGhokJYKosmXWy7ZIk6sswAizdXoAhVAeYKYcDanuMGZWEipeXSTRI4vFuJTHLW_sigSVaHu-rSYQwIC8txZAVAH01R5S1RPGcdgA",
       expiresAt: session.expires_at
         ? new Date(session.expires_at * 1000)
         : undefined,
@@ -110,6 +106,7 @@ export class Connector implements PowerSyncBackendConnector {
 
   async uploadData(database: AbstractPowerSyncDatabase): Promise<void> {
     const transaction = await database.getNextCrudTransaction();
+    console.log("Transaction", transaction);
 
     if (!transaction) {
       return;
@@ -125,7 +122,7 @@ export class Connector implements PowerSyncBackendConnector {
         let result: any = null;
         switch (op.op) {
           case UpdateType.PUT:
-            // eslint-disable-next-line no-case-declarations
+
             const record = { ...op.opData, id: op.id };
             result = await table.upsert(record);
             break;
