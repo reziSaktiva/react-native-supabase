@@ -1,15 +1,20 @@
 import { ReactNode, useMemo } from "react";
 
-import { useSystem, SystemContext } from "../PowerSync";
+import { useSystem } from "./PowerSync";
+import { PowerSyncContext } from "@powersync/react-native";
 
-export const DrizzlePowerSyncProvider = ({
+export const PowerSyncProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const value = useSystem();
+  const { powersync } = useSystem();
+
+  const db = useMemo(() => {
+    return powersync;
+  }, []);
 
   return (
-    <SystemContext.Provider value={value}>{children}</SystemContext.Provider>
+    <PowerSyncContext.Provider value={db!}>{children}</PowerSyncContext.Provider>
   );
 };

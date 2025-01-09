@@ -36,7 +36,9 @@ const Page = () => {
     await db
       ?.insert(todoSchema)
       .values({ id: todoId, task, user_id: userID, is_complete: 0 })
-      .execute();
+      .execute().catch((error) => {
+        console.error(error);
+      });
 
     setTask("");
     loadTodos();
@@ -48,11 +50,7 @@ const Page = () => {
       .set({ is_complete: todo.is_complete === 1 ? 0 : 1 })
       .where(eq(todoSchema.id, todo.id))
       .execute();
-    // await db
-    //   ?.updateTable(TODOS_TABLE)
-    //   .where("id", "=", todo.id)
-    //   .set()
-    //   .execute();
+
     loadTodos();
   };
 

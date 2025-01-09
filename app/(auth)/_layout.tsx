@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native";
-import { useSystem } from "@/powersync/PowerSync";
+import { useSystem } from "@/powersync/drizzle/PowerSync";
 
 const Layout = () => {
   const { supabaseConnector, powersync } = useSystem();
@@ -35,9 +35,11 @@ const Layout = () => {
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" color={color} size={size} />
             ),
-            headerRight: () => (
+            headerLeft: () => (
               <TouchableOpacity onPress={onSignOut}>
-                <Ionicons name="log-out-outline" color="#fff" size={24} />
+                <Ionicons name="log-out-outline" color="#fff" size={24} style={{
+                  marginLeft: 10,
+                }} />
               </TouchableOpacity>
             ),
           }}

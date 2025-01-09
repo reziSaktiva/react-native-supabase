@@ -1,10 +1,11 @@
+import React from "react";
 import { Session } from "@supabase/supabase-js";
 import { Slot, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
-import { PowerSyncProvider } from "@/powersync/PowerSyncProvider";
-import { initSystem, useSystem } from "@/powersync/drizzle/PowerSync";
+import { PowerSyncProvider } from "@/powersync/drizzle/PowerSyncProvider";
+import { useSystem } from "@/powersync/drizzle/PowerSync";
 import { StatusBar } from "expo-status-bar";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -18,9 +19,10 @@ function InitialLayout() {
   const router = useRouter();
 
   const { supabaseConnector } = useSystem();
+  const system = useSystem();
 
   useEffect(() => {
-    initSystem();
+    system.init()
   }, []);
 
   useEffect(() => {
@@ -50,16 +52,16 @@ function InitialLayout() {
 
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <Slot />
     </>
   );
 }
 
-const RootLayout = () => (
-  <PowerSyncProvider>
-    <InitialLayout />
-  </PowerSyncProvider>
-);
-
-export default RootLayout;
+export default function App() {
+  return (
+    <PowerSyncProvider>
+      <InitialLayout />
+    </PowerSyncProvider>
+  );
+}

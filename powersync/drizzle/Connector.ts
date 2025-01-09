@@ -139,9 +139,8 @@ export class Connector implements PowerSyncBackendConnector {
 
         if (result.error) {
           console.error(result.error);
-          result.error.message = `Could not ${
-            op.op
-          } data to Supabase error: ${JSON.stringify(result)}`;
+          result.error.message = `Could not ${op.op
+            } data to Supabase error: ${JSON.stringify(result)}`;
           throw result.error;
         }
       }
