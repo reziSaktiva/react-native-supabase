@@ -13,7 +13,6 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string;
 const powersyncUrl = process.env.EXPO_PUBLIC_POWERSYNC_URL as string;
 
-/// Postgres Response codes that we cannot recover from by retrying.
 const FATAL_RESPONSE_CODES = [
   // Class 22 — Data Exception
   // Examples include data type mismatch.
@@ -135,9 +134,9 @@ export class Connector implements PowerSyncBackendConnector {
         }
 
         if (result.error) {
-          console.error(result.error);
           result.error.message = `Could not ${op.op
             } data to Supabase error: ${JSON.stringify(result)}`;
+
           throw result.error;
         }
       }
