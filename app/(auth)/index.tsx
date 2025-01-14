@@ -13,6 +13,8 @@ import { useSystem } from "@/powersync/drizzle/PowerSync";
 import { uuid } from "@/powersync/uuid";
 import { Todo, todos as todoSchema } from "@/powersync/drizzle/AppSchema";
 import { eq } from "drizzle-orm";
+import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
+
 
 const Page = () => {
   const [task, setTask] = useState("");
@@ -23,6 +25,7 @@ const Page = () => {
   useEffect(() => {
     loadTodos();
   }, []);
+  useDrizzleStudio();
 
   const loadTodos = async () => {
     const result = await db?.select().from(todoSchema);

@@ -3,9 +3,12 @@ import { PowerSyncSQLiteDatabase, wrapPowerSyncWithDrizzle } from "@powersync/dr
 import { Connector } from "./Connector";
 import { PowerSyncDatabase } from "@powersync/react-native";
 import { AppSchema, Database } from "./AppSchema";
+import * as RNFS from '@dr.pogodin/react-native-fs';
 
 import "@azure/core-asynciterator-polyfill";
 import "react-native-url-polyfill/auto";
+
+const dbFilename = "test.sqlite";
 
 export class System {
   supabaseConnector: Connector;
@@ -15,7 +18,7 @@ export class System {
   constructor() {
     this.powersync = new PowerSyncDatabase({
       database: {
-        dbFilename: "test.sqlite",
+        dbFilename,
       },
       schema: AppSchema,
     });
@@ -28,6 +31,8 @@ export class System {
     await this.powersync?.connect(this.supabaseConnector);
   }
 }
+
+export const dbPath = RNFS.DocumentDirectoryPath;
 
 export const system = new System();
 export const SystemContext = createContext(system);
