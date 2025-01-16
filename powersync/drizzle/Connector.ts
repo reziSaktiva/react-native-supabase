@@ -105,7 +105,6 @@ export class Connector implements PowerSyncBackendConnector {
 
   async uploadData(database: AbstractPowerSyncDatabase): Promise<void> {
     const transaction = await database.getNextCrudTransaction();
-    console.log("Transaction", transaction);
 
     if (!transaction) {
       return;
