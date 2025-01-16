@@ -11,10 +11,16 @@ import * as ImagePicker from "expo-image-picker";
 import { supabase } from "@/utils/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import { useSystem } from "@/powersync/drizzle/PowerSync";
 
 const Profile = () => {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>('https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg');
   const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState<{
+    id: string;
+    email: string;
+  } | null>(null);
+  const { supabaseConnector } = useSystem();
 
   useEffect(() => {
     loadUserAvatar();
@@ -29,13 +35,14 @@ const Profile = () => {
 
       if (!user) return;
 
-      const { data } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(`${user.id}/avatar.png`);
+      setUserData(user as any);
+      // const { data } = supabase.storage
+      //   .from("avatars")
+      //   .getPublicUrl(`${user.id}/avatar.png`);
 
-      if (data?.publicUrl) {
-        setImage(data.publicUrl);
-      }
+      // if (data?.publicUrl) {
+      //   setImage(data.publicUrl);
+      // }
     } catch (error) {
       console.log("Error loading avatar:", error);
     } finally {
@@ -134,6 +141,9 @@ const Profile = () => {
           </Text>
         </Pressable>
       </View>
+      <View style={styles.profileNameContainer}>
+        <Text style={styles.profileName}>{userData?.email}</Text>
+      </View>
     </View>
   );
 };
@@ -158,5 +168,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
+  },
+  profileNameContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileName: {
+    color: "#fff",
+    fontSize: 24,
   },
 });

@@ -1,4 +1,4 @@
-import { Todo } from "@/powersync/AppSchema";
+import { Todo } from "@/powersync/drizzle/AppSchema";
 import React, { Component, PropsWithChildren } from "react";
 import { Animated, I18nManager, StyleSheet, View } from "react-native";
 import { RectButton } from "react-native-gesture-handler";

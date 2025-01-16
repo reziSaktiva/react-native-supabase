@@ -34,14 +34,16 @@ const Layout = () => {
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" color={color} size={size} />
-            ),
-            headerLeft: () => (
-              <TouchableOpacity onPress={onSignOut}>
-                <Ionicons name="log-out-outline" color="#fff" size={24} style={{
-                  marginLeft: 10,
-                }} />
-              </TouchableOpacity>
-            ),
+            )
+          }}
+        />
+        <Tabs.Screen
+          name="logs"
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="newspaper-outline" color={color} size={size} />
+            )
           }}
         />
         <Tabs.Screen
@@ -53,7 +55,7 @@ const Layout = () => {
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person-outline" color={color} size={size} />
-            ),
+            )
           }}
         />
       </Tabs>
