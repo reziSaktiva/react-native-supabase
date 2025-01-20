@@ -2,16 +2,8 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TouchableOpacity } from "react-native";
-import { useSystem } from "@/powersync/drizzle/PowerSync";
 
 const Layout = () => {
-  const { supabaseConnector, powersync } = useSystem();
-  const onSignOut = async () => {
-    await powersync?.disconnectAndClear();
-    await supabaseConnector.client.auth.signOut();
-  };
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Tabs

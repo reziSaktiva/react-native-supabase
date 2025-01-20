@@ -12,15 +12,20 @@ import { supabase } from "@/utils/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 import { useSystem } from "@/powersync/drizzle/PowerSync";
+import { useRouter } from "expo-router";
+
 
 const Profile = () => {
   const [image, setImage] = useState<string | null>('https://static.vecteezy.com/system/resources/previews/020/765/399/non_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg');
   const [loading, setLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [userData, setUserData] = useState<{
     id: string;
     email: string;
   } | null>(null);
-  const { supabaseConnector } = useSystem();
+  const { supabaseConnector, powersync } = useSystem();
+
+  const router = useRouter();
 
   useEffect(() => {
     loadUserAvatar();
@@ -36,13 +41,6 @@ const Profile = () => {
       if (!user) return;
 
       setUserData(user as any);
-      // const { data } = supabase.storage
-      //   .from("avatars")
-      //   .getPublicUrl(`${user.id}/avatar.png`);
-
-      // if (data?.publicUrl) {
-      //   setImage(data.publicUrl);
-      // }
     } catch (error) {
       console.log("Error loading avatar:", error);
     } finally {
@@ -97,6 +95,19 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      await powersync?.disconnectAndClear();
+      await supabaseConnector.client.auth.signOut();
+      router.replace("/");
+    } catch (error) {
+      console.log("Error logging out:", error);
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.avatar}>
@@ -144,6 +155,17 @@ const Profile = () => {
       <View style={styles.profileNameContainer}>
         <Text style={styles.profileName}>{userData?.email}</Text>
       </View>
+      <Pressable
+        style={styles.logoutButton}
+        onPress={handleLogout}
+        disabled={logoutLoading}
+      >
+        {logoutLoading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        )}
+      </Pressable>
     </View>
   );
 };
@@ -176,5 +198,17 @@ const styles = StyleSheet.create({
   profileName: {
     color: "#fff",
     fontSize: 24,
+  },
+  logoutButton: {
+    backgroundColor: "#ff4d4d",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 18,
   },
 });
