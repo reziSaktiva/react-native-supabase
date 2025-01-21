@@ -84,19 +84,17 @@ services:
             path: /home/config/sync_rules.yaml
 
           client_auth:
-            supabase: !env PS_SUPABASE_AUTH
-            jwks_uri: !env PS_JWKS_URL
-            audience: ["powersync-dev", "powersync"]
+            supabase: true  # or false, depending on your requirement
+            # supabase_jwt_secret: 
+            jwks:
+              keys:
+                - kty: 'oct'
+                  k: !env PS_SUPABASE_JWT_SECRET
+                  alg: 'HS256'
+            
+            # jwks_uri: !env PS_JWKS_URL
+            # audience: ["powersync-dev", "powersync"]
 
           api:
             tokens:
               - use_a_better_token_in_production
-    entrypoint:
-      - bash
-      - "-c"
-      - |
-        until curl -f http://localhost:${PS_PORT}; do
-          echo "Waiting for powersync service to be available..."
-          sleep 5
-        done
-        start -r unified
