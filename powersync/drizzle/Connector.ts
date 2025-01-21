@@ -105,6 +105,7 @@ export class Connector implements PowerSyncBackendConnector {
 
   async uploadData(database: AbstractPowerSyncDatabase): Promise<void> {
     const transaction = await database.getNextCrudTransaction();
+    console.log("Transaction", transaction);
 
     if (!transaction) {
       return;
@@ -120,7 +121,6 @@ export class Connector implements PowerSyncBackendConnector {
         let result: any = null;
         switch (op.op) {
           case UpdateType.PUT:
-
             const record = { ...op.opData, id: op.id };
             result = await table.upsert(record);
             break;
@@ -133,8 +133,9 @@ export class Connector implements PowerSyncBackendConnector {
         }
 
         if (result.error) {
-          result.error.message = `Could not ${op.op
-            } data to Supabase error: ${JSON.stringify(result)}`;
+          result.error.message = `Could not ${
+            op.op
+          } data to Supabase error: ${JSON.stringify(result)}`;
 
           throw result.error;
         }
@@ -142,6 +143,8 @@ export class Connector implements PowerSyncBackendConnector {
 
       await transaction.complete();
     } catch (ex: any) {
+      console.log(ex);
+
       console.debug(ex);
       if (
         typeof ex.code == "string" &&
