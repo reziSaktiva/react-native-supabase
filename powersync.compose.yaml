@@ -45,7 +45,7 @@ services:
       - "PS_SUPABASE_AUTH=${USE_SUPABASE_AUTH:-false}"
       - "PS_JWKS_URL=${PS_JWKS_URL:-http://localhost:6060/api/auth/keys}"
       - PS_BACKEND_DATABASE_URI=${PS_BACKEND_DATABASE_URI:-postgresql://postgres:postgres@localhost:5432/postgres}
-      - PS_SUPABASE_JWT_SECRET=${PS_BACKEND_DATABASE_URI:-eMPSQu3wrHhNx3DDtOCOYwl44siTalA0}
+      - PS_SUPABASE_JWT_SECRET=${PS_BACKEND_DATABASE_URI:-asdnalnslanlknscalkn}
     ports:
       - "${PS_PORT}:${PS_PORT}"
     volumes:
