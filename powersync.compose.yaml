@@ -39,13 +39,24 @@ services:
       - 'NODE_OPTIONS="--max-old-space-size=1000"'
       - POWERSYNC_CONFIG_PATH=/home/config/powersync.yaml
       - "PS_DATABASE_TYPE=${PS_DEMO_BACKEND_DATABASE_TYPE:-postgresql}"
-      - "PS_DATABASE_URI=${PS_DATABASE_URI:-postgresql://postgres:postgres@localhost:5432/postgres}"
-      - "PS_PORT=${PS_PORT:-8080}"
+      - "PS_DATABASE_URI=${PS_DATABASE_URI:-postgresql://postgres:postgres@db:5432/postgres}"
+      - "PS_PORT=${PS_PORT:-4040}"
       - "PS_MONGO_URI=${PS_MONGO_URI:-mongodb://mongo:27017/my_db}"
       - "PS_SUPABASE_AUTH=${USE_SUPABASE_AUTH:-false}"
       - "PS_JWKS_URL=${PS_JWKS_URL:-http://localhost:6060/api/auth/keys}"
-      - PS_BACKEND_DATABASE_URI=${PS_BACKEND_DATABASE_URI:-postgresql://postgres:postgres@localhost:5432/postgres}
-      - PS_SUPABASE_JWT_SECRET=${PS_BACKEND_DATABASE_URI:-asdnalnslanlknscalkn}
+      - PS_BACKEND_DATABASE_URI=${PS_BACKEND_DATABASE_URI:-postgresql://postgres:postgres@db:5432/postgres}
+      - PS_SUPABASE_JWT_SECRET=${PS_BACKEND_DATABASE_URI:-eMPSQu3wrHhNx3DDtOCOYwl44siTalA0}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://147.93.116.63:${PS_PORT}/probes/liveness').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 1s
+      retries: 15
     ports:
       - "${PS_PORT}:${PS_PORT}"
     volumes:
@@ -55,11 +66,15 @@ services:
         target: /home/config/sync_rules.yaml
         content: |
           bucket_definitions:
-            user_lists:
-              parameters: select id as list_id from lists where owner_id = request.user_id()
+            user_list: 
+              parameters: SELECT token_parameters.user_id as user_id
               data:
-                - select * from lists where id = bucket.list_id
-                - select * from todos where list_id = bucket.list_id
+                  - select * from todos where user_id = bucket.user_id
+                  - select * from logs where user_id = bucket.user_id
+            log_list:
+              parameters: SELECT id as log_id FROM logs WHERE user_id = request.user_id()
+              data:
+                - SELECT * FROM notes WHERE log_id = bucket.log_id
       - type: bind
         source: ./volumes/config/powersync.yaml
         target: /home/config/powersync.yaml
