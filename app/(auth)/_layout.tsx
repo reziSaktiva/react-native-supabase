@@ -26,7 +26,7 @@ const Layout = () => {
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" color={color} size={size} />
-            )
+            ),
           }}
         />
         <Tabs.Screen
@@ -35,7 +35,7 @@ const Layout = () => {
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="newspaper-outline" color={color} size={size} />
-            )
+            ),
           }}
         />
         <Tabs.Screen
@@ -47,7 +47,19 @@ const Layout = () => {
             },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person-outline" color={color} size={size} />
-            )
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="chatAi"
+          options={{
+            title: "Chat AI",
+            headerTitleStyle: {
+              color: "#fff",
+            },
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="person-outline" color={color} size={size} />
+            ),
           }}
         />
       </Tabs>

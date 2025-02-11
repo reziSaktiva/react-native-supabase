@@ -8,10 +8,16 @@ import {
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "react-native-url-polyfill/auto";
+import ollama from "@/utils/ollama";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL as string;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY as string;
 const powersyncUrl = process.env.EXPO_PUBLIC_POWERSYNC_URL as string;
+
+type Message = {
+  role: "assistant" | "user" | "system";
+  content: string;
+};
 
 const FATAL_RESPONSE_CODES = [
   // Class 22 — Data Exception
